@@ -1,0 +1,38 @@
+{
+  "name": "qiaomu-ai-access",
+  "version": "0.1.0",
+  "owner": "向阳乔木",
+  "updated_at": "2026-07-03",
+  "status": "active",
+  "maturity_tier": "governed",
+  "lifecycle_stage": "public-initial",
+  "upstream_inspiration": "yArna/isChinaUser",
+  "qiaomu_defaults": {
+    "language": "zh-CN-first",
+    "public_readme": "Chinese-first bilingual",
+    "copyright": "Copyright (c) 向阳乔木",
+    "x": "https://x.com/vista8",
+    "github": "https://github.com/joeseesun/"
+  },
+  "release_gates": {
+    "validate_skill": "npm run validate:skill",
+    "trigger_eval": "npm run eval:trigger",
+    "skill_ir": "npm run export:ir",
+    "unit_tests": "npm test",
+    "secret_scan": "npm run secret:scan",
+    "install_proof": "npx skills add . --list"
+  },
+  "trust_boundary": {
+    "allowed": [
+      "environment signal detection",
+      "explicit consent prompt",
+      "compliant privacy-hygiene suggestions"
+    ],
+    "disallowed": [
+      "geofence bypass",
+      "platform-risk evasion",
+      "IP/account/payment/KYC misrepresentation",
+      "CAPTCHA or fingerprint bypass"
+    ]
+  }
+}

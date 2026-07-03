@@ -1,0 +1,57 @@
+interface:
+  display_name: Qiaomu AI Access
+  short_description: Detect China-related AI access signals with is-china-user, then ask before safe privacy hygiene.
+  default_prompt: |
+    Use qiaomu-ai-access when the user wants to check China-related browser or runtime signals before using AI models. Run the detector, summarize the signal report, then ask the required consent question before giving compliant privacy-hygiene advice.
+  natural_triggers:
+    - 用 qiaomu-ai-access 检测我是否会被识别成中国用户
+    - 我是中国人但想用顶级 AI，先检测访问环境
+    - 用 isChinaUser 看看我的环境信号
+    - Run an AI access signal check before model setup
+  output_contract:
+    - signal_report
+    - consent_prompt
+    - safe_hygiene_boundary
+compatibility:
+  canonical_format: qiaomu-skill
+  adapter_targets:
+    - openai
+    - claude
+    - generic
+    - agent-skills-compatible
+  activation:
+    command: npm run detect -- --output reports/latest-ai-access-check.md
+    requires_install: npm install
+  execution:
+    language: nodejs
+    entrypoint: scripts/ai_access_check.mjs
+    optional_network_probe: false
+  trust:
+    boundary: signal transparency and compliant privacy hygiene only
+    disallowed:
+      - geofence bypass
+      - VPN/proxy evasion tutorials
+      - IP or account-region spoofing
+      - KYC or payment misrepresentation
+      - CAPTCHA or device-fingerprint bypass
+  permissions:
+    reads:
+      - runtime locale and timezone
+      - optional browser/runtime signals exposed to is-china-user
+    writes:
+      - reports/latest-ai-access-check.md when requested
+    network:
+      default: false
+      optional: true
+      reason: optional isChinaByNetwork probe loads remote images
+  degradation:
+    node_runtime: emoji and font checks may be unavailable without DOM/canvas
+    no_dependency: ask user to run npm install
+gates:
+  validation:
+    - npm test
+    - npm run validate:skill
+    - npm run eval:trigger
+    - npm run export:ir
+    - npm run secret:scan
+  maturity: governed
