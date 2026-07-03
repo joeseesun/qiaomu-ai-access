@@ -81,7 +81,7 @@ def build_ir(root: Path) -> dict[str, Any]:
         },
         "intent": {
             "description": frontmatter.get("description", ""),
-            "job_to_be_done": "Detect China-related AI access environment signals, report them transparently, then ask for consent before safe privacy hygiene.",
+            "job_to_be_done": "Detect China-related AI access runtime and browser signals, optionally run consented network probes, report coverage transparently, then ask for consent before safe privacy hygiene.",
             "target_users": [
                 "Qiaomu operator",
                 "AI builders checking local/browser runtime signals",
@@ -100,13 +100,15 @@ def build_ir(root: Path) -> dict[str, Any]:
         },
         "workflow": [
             "state safety boundary",
-            "run npm run detect",
+            "run npm run detect:browser",
+            "run npm run detect:full only when the user explicitly agrees to remote network probes",
             "summarize signal report",
             "ask required consent question",
             "provide only compliant, non-destructive privacy hygiene if user agrees"
         ],
         "resources": {
             "runtime_script": "scripts/ai_access_check.mjs",
+            "browser_dependency": "playwright-core temporary headless-shell context",
             "references": [
                 "references/safety-boundary.md",
                 "references/upstream-is-china-user.md"
@@ -125,8 +127,8 @@ def build_ir(root: Path) -> dict[str, Any]:
         },
         "gates": manifest.get("release_gates", {}),
         "evidence_boundary": {
-            "local_cli_detection": "verified by npm test and npm run detect",
-            "browser_dom_canvas_detection": "missing evidence unless user runs upstream in a browser context",
+            "local_cli_detection": "verified by npm test and npm run check",
+            "browser_dom_canvas_detection": "verified by npm run smoke:browser in a temporary Playwright headless-shell context",
             "network_probe": "optional and off by default",
             "upstream_license_review": "missing evidence; upstream has no declared license metadata",
             "public_claim_policy": "claim only local validations, install proof, and GitHub state verified in the current run"

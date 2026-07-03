@@ -36,10 +36,16 @@ Detect first, ask second, stay inside legal and platform boundaries.
 
    ```bash
    npm install
-   npm run detect -- --output reports/latest-ai-access-check.md
+   npm run detect:browser -- --output reports/latest-ai-access-check.md
    ```
 
-3. Show the user the high-level status and signal table. Do not overstate Node-only results as full browser fingerprint results.
+   If the user explicitly agrees to remote network probes, run:
+
+   ```bash
+   npm run detect:full -- --output reports/latest-ai-access-check.md
+   ```
+
+3. Show the user the high-level status, coverage level, and signal table. Treat `runtime`, `browser`, and `network` coverage separately; do not overstate skipped or unavailable layers.
 4. Ask this exact confirmation before any follow-up hygiene advice:
 
    ```text
@@ -57,7 +63,8 @@ Detect first, ask second, stay inside legal and platform boundaries.
 ## Output Contract
 
 - `reports/latest-ai-access-check.md` when the detector is run with `--output`.
-- A concise status: `china-signals-detected`, `no-china-signal-in-current-runtime`, or `inconclusive`.
+- A concise status: `china-signals-detected`, `no-china-signal-detected`, or `inconclusive`.
+- A coverage table for `runtime`, `browser`, and `network`.
 - A signal table with source, value, and notes.
 - The required consent prompt.
 - Clear unavailable/missing-evidence labels for browser-only or network-only signals not measured in the current run.
@@ -65,7 +72,9 @@ Detect first, ask second, stay inside legal and platform boundaries.
 ## Runtime Notes
 
 - The first-step detector imports the npm package `is-china-user`.
-- Node.js can reliably inspect timezone and limited runtime locale data, but DOM/canvas-based emoji and font checks are unavailable unless the library is run in a browser-like environment.
+- Node.js can reliably inspect timezone and limited runtime locale data.
+- Browser coverage uses a temporary Playwright Chromium/headless-shell context, injects the installed `is-china-user` package bundle into that page, and does not read a personal browser profile.
+- DOM/canvas-based emoji and font checks should be interpreted from the browser layer, not from Node-only runs.
 - Optional network probing is off by default because it creates real remote requests and is noisy under proxies, extensions, DNS failures, or offline conditions.
 - The upstream package currently has no declared license in GitHub/npm metadata, so this skill depends on it without vendoring its source.
 
@@ -75,6 +84,7 @@ Run before publishing changes:
 
 ```bash
 npm test
+npm run smoke:browser
 npm run validate:skill
 npm run eval:trigger
 npm run export:ir

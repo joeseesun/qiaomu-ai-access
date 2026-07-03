@@ -3,16 +3,16 @@
   "generated_at": "2026-07-03",
   "package": {
     "name": "qiaomu-ai-access",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "owner": "向阳乔木",
     "maturity_tier": "governed",
-    "lifecycle_stage": "public-initial",
+    "lifecycle_stage": "public-browser-coverage",
     "license": "MIT",
     "upstream_dependency": "yArna/isChinaUser / npm:is-china-user"
   },
   "intent": {
     "description": "Use this qiaomu skill workflow when the user wants to check whether their\nlocal or browser environment looks like a China user before accessing AI\nmodels, using yArna/isChinaUser first, then asking for explicit consent before\nsafe privacy-hygiene guidance. Trigger on requests such as \"我是中国人但想用顶级AI\",\n\"检测中国用户特征\", \"用 isChinaUser 检测\", \"qiaomu-ai-access\", \"AI access region\nsignal check\", or \"先检测再问我要不要整理隐私特征\". Do not provide VPN/proxy,\ngeofence bypass, sanctions evasion, account-region spoofing, KYC/payment\nmisrepresentation, CAPTCHA/device-fingerprint bypass, or platform-risk\nevasion instructions; offer compliant alternatives instead.\n",
-    "job_to_be_done": "Detect China-related AI access environment signals, report them transparently, then ask for consent before safe privacy hygiene.",
+    "job_to_be_done": "Detect China-related AI access runtime and browser signals, optionally run consented network probes, report coverage transparently, then ask for consent before safe privacy hygiene.",
     "target_users": [
       "Qiaomu operator",
       "AI builders checking local/browser runtime signals",
@@ -29,7 +29,9 @@
       "用 qiaomu-ai-access 检测我现在是不是会被识别成中国用户",
       "我是中国人，但我想用顶级AI，先用 isChinaUser 检测一下环境信号",
       "检测语言、时区、emoji、字体这些中国用户特征，然后问我要不要继续做隐私卫生",
-      "Run an AI access region signal check and ask for consent before privacy hygiene advice."
+      "Run an AI access region signal check and ask for consent before privacy hygiene advice.",
+      "把上游 isChinaUser 的浏览器、emoji、字体、网络检测全面吸收到我们的 skill 中",
+      "用真实浏览器检测我现在的中国用户特征，不要只看 Node.js 时区"
     ],
     "should_not_trigger": [
       "给我一个购买 VPN 并绕过 OpenAI 地区限制的教程",
@@ -45,13 +47,15 @@
   },
   "workflow": [
     "state safety boundary",
-    "run npm run detect",
+    "run npm run detect:browser",
+    "run npm run detect:full only when the user explicitly agrees to remote network probes",
     "summarize signal report",
     "ask required consent question",
     "provide only compliant, non-destructive privacy hygiene if user agrees"
   ],
   "resources": {
     "runtime_script": "scripts/ai_access_check.mjs",
+    "browser_dependency": "playwright-core temporary headless-shell context",
     "references": [
       "references/safety-boundary.md",
       "references/upstream-is-china-user.md"
@@ -73,12 +77,13 @@
       "agent-skills-compatible"
     ],
     "activation": {
-      "command": "npm run detect -- --output reports/latest-ai-access-check.md",
+      "command": "npm run detect:browser -- --output reports/latest-ai-access-check.md",
       "requires_install": "npm install"
     },
     "execution": {
       "language": "nodejs",
       "entrypoint": "scripts/ai_access_check.mjs",
+      "browser_probe": "temporary Playwright Chromium/headless-shell context",
       "optional_network_probe": false
     },
     "trust": {
@@ -94,7 +99,7 @@
     "permissions": {
       "reads": [
         "runtime locale and timezone",
-        "optional browser/runtime signals exposed to is-china-user"
+        "browser navigator, timezone, emoji canvas, and font canvas signals exposed to is-china-user"
       ],
       "writes": [
         "reports/latest-ai-access-check.md when requested"
@@ -106,7 +111,8 @@
       }
     },
     "degradation": {
-      "node_runtime": "emoji and font checks may be unavailable without DOM/canvas",
+      "node_runtime": "emoji and font checks require browser coverage",
+      "no_browser": "browser layer is marked unavailable and runtime coverage still reports",
       "no_dependency": "ask user to run npm install"
     }
   },
@@ -115,12 +121,13 @@
     "trigger_eval": "npm run eval:trigger",
     "skill_ir": "npm run export:ir",
     "unit_tests": "npm test",
+    "browser_smoke": "npm run smoke:browser",
     "secret_scan": "npm run secret:scan",
     "install_proof": "npx skills add . --list"
   },
   "evidence_boundary": {
-    "local_cli_detection": "verified by npm test and npm run detect",
-    "browser_dom_canvas_detection": "missing evidence unless user runs upstream in a browser context",
+    "local_cli_detection": "verified by npm test and npm run check",
+    "browser_dom_canvas_detection": "verified by npm run smoke:browser in a temporary Playwright headless-shell context",
     "network_probe": "optional and off by default",
     "upstream_license_review": "missing evidence; upstream has no declared license metadata",
     "public_claim_policy": "claim only local validations, install proof, and GitHub state verified in the current run"

@@ -19,6 +19,12 @@ POSITIVE_TERMS = [
     "ai access",
     "region signal",
     "环境信号",
+    "浏览器检测",
+    "真实浏览器",
+    "全面吸收",
+    "全面检测",
+    "browser",
+    "network probe",
     "隐私卫生",
 ]
 
