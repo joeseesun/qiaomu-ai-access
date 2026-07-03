@@ -26,6 +26,7 @@ REQUIRED_FILES = [
     "references/safety-boundary.md",
     "references/upstream-is-china-user.md",
     "scripts/ai_access_check.mjs",
+    "scripts/assert_browser_smoke.mjs",
     "scripts/secret_scan.mjs",
 ]
 
@@ -97,6 +98,8 @@ def validate(root: Path) -> dict[str, Any]:
             "安全边界",
             "is-china-user",
             "Troubleshooting",
+            "npm run detect:browser",
+            "npm run detect:full",
             "# English",
         ]
         for snippet in required_snippets:
@@ -112,7 +115,19 @@ def validate(root: Path) -> dict[str, Any]:
         deps = package.get("dependencies", {})
         if "is-china-user" not in deps:
             failures.append("package.json must depend on is-china-user")
-        for script in ("test", "detect", "validate:skill", "eval:trigger", "export:ir", "secret:scan"):
+        if "playwright-core" not in deps:
+            failures.append("package.json must depend on playwright-core for browser coverage")
+        for script in (
+            "test",
+            "detect",
+            "detect:browser",
+            "detect:full",
+            "smoke:browser",
+            "validate:skill",
+            "eval:trigger",
+            "export:ir",
+            "secret:scan",
+        ):
             if script not in package.get("scripts", {}):
                 failures.append(f"package.json missing script: {script}")
 

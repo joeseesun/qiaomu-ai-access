@@ -1,6 +1,6 @@
 {
   "name": "qiaomu-ai-access",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AI access environment signal check and safe privacy-hygiene agent skill.",
   "type": "module",
   "license": "MIT",
@@ -28,15 +28,19 @@
   ],
   "scripts": {
     "detect": "node scripts/ai_access_check.mjs",
+    "detect:browser": "node scripts/ai_access_check.mjs --include-browser",
+    "detect:full": "node scripts/ai_access_check.mjs --include-browser --include-network",
+    "smoke:browser": "node scripts/ai_access_check.mjs --include-browser --json | node scripts/assert_browser_smoke.mjs",
     "test": "node --test scripts/test_ai_access_check.mjs",
     "validate:skill": "python3 scripts/validate_skill.py .",
     "eval:trigger": "python3 scripts/trigger_eval.py . --cases evals/trigger_cases.json --output reports/trigger-eval.json",
     "export:ir": "python3 scripts/export_skill_ir.py . --output reports/skill-ir.json",
     "secret:scan": "node scripts/secret_scan.mjs",
-    "check": "npm test && npm run validate:skill && npm run eval:trigger && npm run export:ir && npm run secret:scan"
+    "check": "npm test && npm run smoke:browser && npm run validate:skill && npm run eval:trigger && npm run export:ir && npm run secret:scan"
   },
   "dependencies": {
-    "is-china-user": "^1.7.0"
+    "is-china-user": "^1.7.0",
+    "playwright-core": "^1.61.1"
   },
   "engines": {
     "node": ">=20"

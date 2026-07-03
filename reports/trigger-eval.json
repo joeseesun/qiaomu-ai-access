@@ -1,8 +1,8 @@
 {
   "ok": true,
   "summary": {
-    "total": 11,
-    "passed": 11,
+    "total": 13,
+    "passed": 13,
     "pass_rate": 1.0
   },
   "failures": [],
@@ -32,6 +32,20 @@
       {
         "prompt": "Run an AI access region signal check and ask for consent before privacy hygiene advice.",
         "family": "english",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true
+      },
+      {
+        "prompt": "把上游 isChinaUser 的浏览器、emoji、字体、网络检测全面吸收到我们的 skill 中",
+        "family": "browser_coverage",
+        "expected_trigger": true,
+        "predicted_trigger": true,
+        "passed": true
+      },
+      {
+        "prompt": "用真实浏览器检测我现在的中国用户特征，不要只看 Node.js 时区",
+        "family": "browser_coverage",
         "expected_trigger": true,
         "predicted_trigger": true,
         "passed": true

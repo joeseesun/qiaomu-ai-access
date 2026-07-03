@@ -7,7 +7,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/joeseesun/qiaomu-ai-access?style=flat-square)](https://github.com/joeseesun/qiaomu-ai-access/commits/main)
 [![License](https://img.shields.io/github/license/joeseesun/qiaomu-ai-access?style=flat-square)](LICENSE)
 
-**已验证:** `npm test`、`npm run validate:skill`、`npm run eval:trigger`、`npm run secret:scan`、本地 `npx skills add . --list`。
+**已验证:** `npm test`、`npm run smoke:browser`、`npm run detect:full -- --json`、`npm run validate:skill`、`npm run eval:trigger`、`npm run secret:scan`、本地 `npx skills add . --list`。
 
 ## 为什么值得用
 
@@ -46,9 +46,10 @@ npm run check
 ## 它会做什么
 
 1. 调用上游 npm 包 `is-china-user` 做第一步检测。
-2. 输出 `isChinaUser`、语言、时区、emoji、字体、可选网络探针等信号。
-3. 生成一段固定的用户确认问题，说明哪些事可以做、哪些事不会做。
-4. 用户明确同意后，只提供非破坏、非规避的隐私卫生建议。
+2. 默认检查 Node.js runtime；推荐同时运行临时无界面浏览器，覆盖上游的 navigator、Intl、emoji canvas、font canvas 信号。
+3. 输出 `isChinaUser`、语言、时区、emoji、字体、可选网络探针等信号，并标出 `runtime`、`browser`、`network` 覆盖状态。
+4. 生成一段固定的用户确认问题，说明哪些事可以做、哪些事不会做。
+5. 用户明确同意后，只提供非破坏、非规避的隐私卫生建议。
 
 ## 快速运行
 
@@ -56,19 +57,25 @@ npm run check
 npm run detect -- --output reports/latest-ai-access-check.md
 ```
 
+推荐的全面本地检测（runtime + browser，不发起远程网络探针）：
+
+```bash
+npm run detect:browser -- --output reports/latest-ai-access-check.md
+```
+
 输出 JSON：
 
 ```bash
-npm run detect -- --json
+npm run detect:browser -- --json
 ```
 
-可选网络探针：
+显式启用网络探针：
 
 ```bash
-npm run detect -- --include-network --output reports/latest-ai-access-check.md
+npm run detect:full -- --output reports/latest-ai-access-check.md
 ```
 
-网络探针会加载远程图片资源，结果受代理、浏览器扩展、DNS、企业网络和离线状态影响。默认不启用。
+浏览器层优先使用 Playwright 缓存的 `chrome-headless-shell`，找不到时再尝试 Chrome/Chromium/Edge/Brave。它使用临时自动化浏览器上下文，不读取个人浏览器 profile。网络探针会加载远程图片资源，结果受代理、DNS、企业网络和离线状态影响，默认不启用。
 
 ## 安全边界
 
@@ -96,6 +103,7 @@ npm run detect -- --include-network --output reports/latest-ai-access-check.md
 
 - [ ] Node.js 20+：`node --version`
 - [ ] npm：`npm --version`
+- [ ] 推荐浏览器层检测：`npm run detect:browser -- --json`
 - [ ] 可安装 agent skills：`npx skills --help`
 - [ ] 如需发布到 GitHub：`gh auth status`
 
@@ -104,6 +112,7 @@ npm run detect -- --include-network --output reports/latest-ai-access-check.md
 ```text
 AI access signal check
 Status: china-signals-detected
+Coverage: runtime+browser
 
 Signals:
 - isChinaUser: true
@@ -112,6 +121,8 @@ Signals:
 - emoji: unavailable in this runtime
 - font: false
 - network: skipped
+- browser.emoji: true
+- browser.font: true
 
 Consent prompt:
 是否继续做合规隐私卫生检查？我可以帮你减少 prompt、浏览器偏好和工作区说明里不必要的地域信号；不会帮助绕过平台地域限制、伪装 IP/身份、规避风控或违反服务条款。
@@ -121,10 +132,15 @@ Consent prompt:
 
 没有必需环境变量。报告路径由 `--output` 参数显式指定；不传时只输出到终端。
 
+- `QIAOMU_AI_ACCESS_BROWSER`：可选，指定 Chrome/Chromium 可执行文件路径。
+- `--browser-executable <path>`：同上，命令行优先。
+- `--network-timeout <ms>`：可选，网络探针单个图片超时时间，默认 `3000`。
+
 ## 开发与验证
 
 ```bash
 npm test
+npm run smoke:browser
 npm run validate:skill
 npm run eval:trigger
 npm run export:ir
@@ -136,7 +152,8 @@ npm run secret:scan
 | 问题 | 原因 | 解决 |
 |---|---|---|
 | `Cannot find package 'is-china-user'` | 还没有安装依赖 | 运行 `npm install` |
-| emoji/font 显示 unavailable | 当前是 Node.js 运行时，没有 DOM/canvas | 在真实浏览器里运行上游库，或把结果当作 Node-only 检测 |
+| emoji/font 显示 unavailable | 当前是 Node.js 运行时，没有 DOM/canvas | 运行 `npm run detect:browser -- --json` |
+| 浏览器层显示 `unavailable` | 未安装 Playwright 浏览器、Chrome 无法自动化启动，或指定路径不可用 | 运行 `npx playwright-core install chromium`，或用 `--browser-executable` 指定可用浏览器 |
 | 网络探针返回 `null` | 离线、扩展拦截、DNS 或所有探针都不可达 | 换网络后重跑，或不把网络项作为结论 |
 | `npx skills add` 找不到 skill | 安装源或 npm 缓存异常 | 用 `npx skills add https://github.com/joeseesun/qiaomu-ai-access` |
 
@@ -176,7 +193,7 @@ npx skills add joeseesun/qiaomu-ai-access
 
 ```bash
 npm install
-npm run detect -- --output reports/latest-ai-access-check.md
+npm run detect:browser -- --output reports/latest-ai-access-check.md
 npm run check
 ```
 

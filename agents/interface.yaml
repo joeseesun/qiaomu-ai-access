@@ -20,11 +20,12 @@ compatibility:
     - generic
     - agent-skills-compatible
   activation:
-    command: npm run detect -- --output reports/latest-ai-access-check.md
+    command: npm run detect:browser -- --output reports/latest-ai-access-check.md
     requires_install: npm install
   execution:
     language: nodejs
     entrypoint: scripts/ai_access_check.mjs
+    browser_probe: temporary Playwright Chromium/headless-shell context
     optional_network_probe: false
   trust:
     boundary: signal transparency and compliant privacy hygiene only
@@ -37,7 +38,7 @@ compatibility:
   permissions:
     reads:
       - runtime locale and timezone
-      - optional browser/runtime signals exposed to is-china-user
+      - browser navigator, timezone, emoji canvas, and font canvas signals exposed to is-china-user
     writes:
       - reports/latest-ai-access-check.md when requested
     network:
@@ -45,11 +46,13 @@ compatibility:
       optional: true
       reason: optional isChinaByNetwork probe loads remote images
   degradation:
-    node_runtime: emoji and font checks may be unavailable without DOM/canvas
+    node_runtime: emoji and font checks require browser coverage
+    no_browser: browser layer is marked unavailable and runtime coverage still reports
     no_dependency: ask user to run npm install
 gates:
   validation:
     - npm test
+    - npm run smoke:browser
     - npm run validate:skill
     - npm run eval:trigger
     - npm run export:ir

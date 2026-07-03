@@ -1,11 +1,11 @@
 {
   "name": "qiaomu-ai-access",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "owner": "向阳乔木",
   "updated_at": "2026-07-03",
   "status": "active",
   "maturity_tier": "governed",
-  "lifecycle_stage": "public-initial",
+  "lifecycle_stage": "public-browser-coverage",
   "upstream_inspiration": "yArna/isChinaUser",
   "qiaomu_defaults": {
     "language": "zh-CN-first",
@@ -19,6 +19,7 @@
     "trigger_eval": "npm run eval:trigger",
     "skill_ir": "npm run export:ir",
     "unit_tests": "npm test",
+    "browser_smoke": "npm run smoke:browser",
     "secret_scan": "npm run secret:scan",
     "install_proof": "npx skills add . --list"
   },
