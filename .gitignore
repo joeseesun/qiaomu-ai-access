@@ -1,6 +1,8 @@
 node_modules/
+.agents/
 .env
 .env.*
 !.env.example
 npm-debug.log*
 reports/latest-ai-access-check.md
+skills-lock.json
