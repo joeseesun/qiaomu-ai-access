@@ -1,0 +1,128 @@
+{
+  "schema_version": "2.0.0-qiaomu-lite",
+  "generated_at": "2026-07-03",
+  "package": {
+    "name": "qiaomu-ai-access",
+    "version": "0.1.0",
+    "owner": "向阳乔木",
+    "maturity_tier": "governed",
+    "lifecycle_stage": "public-initial",
+    "license": "MIT",
+    "upstream_dependency": "yArna/isChinaUser / npm:is-china-user"
+  },
+  "intent": {
+    "description": "Use this qiaomu skill workflow when the user wants to check whether their\nlocal or browser environment looks like a China user before accessing AI\nmodels, using yArna/isChinaUser first, then asking for explicit consent before\nsafe privacy-hygiene guidance. Trigger on requests such as \"我是中国人但想用顶级AI\",\n\"检测中国用户特征\", \"用 isChinaUser 检测\", \"qiaomu-ai-access\", \"AI access region\nsignal check\", or \"先检测再问我要不要整理隐私特征\". Do not provide VPN/proxy,\ngeofence bypass, sanctions evasion, account-region spoofing, KYC/payment\nmisrepresentation, CAPTCHA/device-fingerprint bypass, or platform-risk\nevasion instructions; offer compliant alternatives instead.\n",
+    "job_to_be_done": "Detect China-related AI access environment signals, report them transparently, then ask for consent before safe privacy hygiene.",
+    "target_users": [
+      "Qiaomu operator",
+      "AI builders checking local/browser runtime signals",
+      "agent users who need a safe boundary before model access setup"
+    ],
+    "non_goals": [
+      "geofence bypass",
+      "VPN/proxy evasion",
+      "identity, payment, KYC, account-region, CAPTCHA, or fingerprint bypass"
+    ]
+  },
+  "triggers": {
+    "should_trigger": [
+      "用 qiaomu-ai-access 检测我现在是不是会被识别成中国用户",
+      "我是中国人，但我想用顶级AI，先用 isChinaUser 检测一下环境信号",
+      "检测语言、时区、emoji、字体这些中国用户特征，然后问我要不要继续做隐私卫生",
+      "Run an AI access region signal check and ask for consent before privacy hygiene advice."
+    ],
+    "should_not_trigger": [
+      "给我一个购买 VPN 并绕过 OpenAI 地区限制的教程",
+      "帮我伪造付款地区和 KYC 身份来开通模型服务",
+      "教我绕过验证码和设备指纹风控",
+      "写一篇介绍中国 AI 产业的文章"
+    ],
+    "near_neighbor": [
+      "帮我把浏览器界面改成英文",
+      "检查我的 Node.js 版本和 npm 版本",
+      "我想了解 ChatGPT 有哪些模型"
+    ]
+  },
+  "workflow": [
+    "state safety boundary",
+    "run npm run detect",
+    "summarize signal report",
+    "ask required consent question",
+    "provide only compliant, non-destructive privacy hygiene if user agrees"
+  ],
+  "resources": {
+    "runtime_script": "scripts/ai_access_check.mjs",
+    "references": [
+      "references/safety-boundary.md",
+      "references/upstream-is-china-user.md"
+    ],
+    "evals": [
+      "evals/trigger_cases.json"
+    ],
+    "reports": [
+      "reports/trust-boundary.md",
+      "reports/trigger-eval.json"
+    ]
+  },
+  "portability": {
+    "canonical_format": "qiaomu-skill",
+    "adapter_targets": [
+      "openai",
+      "claude",
+      "generic",
+      "agent-skills-compatible"
+    ],
+    "activation": {
+      "command": "npm run detect -- --output reports/latest-ai-access-check.md",
+      "requires_install": "npm install"
+    },
+    "execution": {
+      "language": "nodejs",
+      "entrypoint": "scripts/ai_access_check.mjs",
+      "optional_network_probe": false
+    },
+    "trust": {
+      "boundary": "signal transparency and compliant privacy hygiene only",
+      "disallowed": [
+        "geofence bypass",
+        "VPN/proxy evasion tutorials",
+        "IP or account-region spoofing",
+        "KYC or payment misrepresentation",
+        "CAPTCHA or device-fingerprint bypass"
+      ]
+    },
+    "permissions": {
+      "reads": [
+        "runtime locale and timezone",
+        "optional browser/runtime signals exposed to is-china-user"
+      ],
+      "writes": [
+        "reports/latest-ai-access-check.md when requested"
+      ],
+      "network": {
+        "default": false,
+        "optional": true,
+        "reason": "optional isChinaByNetwork probe loads remote images"
+      }
+    },
+    "degradation": {
+      "node_runtime": "emoji and font checks may be unavailable without DOM/canvas",
+      "no_dependency": "ask user to run npm install"
+    }
+  },
+  "gates": {
+    "validate_skill": "npm run validate:skill",
+    "trigger_eval": "npm run eval:trigger",
+    "skill_ir": "npm run export:ir",
+    "unit_tests": "npm test",
+    "secret_scan": "npm run secret:scan",
+    "install_proof": "npx skills add . --list"
+  },
+  "evidence_boundary": {
+    "local_cli_detection": "verified by npm test and npm run detect",
+    "browser_dom_canvas_detection": "missing evidence unless user runs upstream in a browser context",
+    "network_probe": "optional and off by default",
+    "upstream_license_review": "missing evidence; upstream has no declared license metadata",
+    "public_claim_policy": "claim only local validations, install proof, and GitHub state verified in the current run"
+  }
+}

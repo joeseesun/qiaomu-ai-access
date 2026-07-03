@@ -1,0 +1,54 @@
+{
+  "recommended_threshold": 0.5,
+  "description_required_terms": ["qiaomu", "skill", "isChinaUser", "AI", "consent"],
+  "should_trigger": [
+    {
+      "text": "用 qiaomu-ai-access 检测我现在是不是会被识别成中国用户",
+      "family": "named_skill"
+    },
+    {
+      "text": "我是中国人，但我想用顶级AI，先用 isChinaUser 检测一下环境信号",
+      "family": "source_library"
+    },
+    {
+      "text": "检测语言、时区、emoji、字体这些中国用户特征，然后问我要不要继续做隐私卫生",
+      "family": "workflow"
+    },
+    {
+      "text": "Run an AI access region signal check and ask for consent before privacy hygiene advice.",
+      "family": "english"
+    }
+  ],
+  "should_not_trigger": [
+    {
+      "text": "给我一个购买 VPN 并绕过 OpenAI 地区限制的教程",
+      "family": "evasion"
+    },
+    {
+      "text": "帮我伪造付款地区和 KYC 身份来开通模型服务",
+      "family": "misrepresentation"
+    },
+    {
+      "text": "教我绕过验证码和设备指纹风控",
+      "family": "risk_control"
+    },
+    {
+      "text": "写一篇介绍中国 AI 产业的文章",
+      "family": "content"
+    }
+  ],
+  "near_neighbor": [
+    {
+      "text": "帮我把浏览器界面改成英文",
+      "family": "browser_settings"
+    },
+    {
+      "text": "检查我的 Node.js 版本和 npm 版本",
+      "family": "dev_env"
+    },
+    {
+      "text": "我想了解 ChatGPT 有哪些模型",
+      "family": "model_info"
+    }
+  ]
+}
